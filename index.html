@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小猪打卡 🐷</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23E8762A'/%3E%3Crect x='10' y='8' width='12' height='10' fill='%23FFB8C6'/%3E%3Crect x='8' y='10' width='4' height='6' fill='%23FFB8C6'/%3E%3Crect x='20' y='10' width='4' height='6' fill='%23FFB8C6'/%3E%3Crect x='11' y='7' width='4' height='4' fill='%23FFB8C6'/%3E%3Crect x='17' y='7' width='4' height='4' fill='%23FFB8C6'/%3E%3Crect x='12' y='14' width='8' height='2' fill='%23FF8FAB'/%3E%3Crect x='13' y='13' width='2' height='1' fill='%23C45A7A'/%3E%3Crect x='17' y='13' width='2' height='1' fill='%23C45A7A'/%3E%3Crect x='13' y='16' width='2' height='2' fill='%23FF8FAB'/%3E%3Crect x='17' y='16' width='2' height='2' fill='%23FF8FAB'/%3E%3C/svg%3E">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --orange: #E8762A;
+    --orange-light: #FFF0E6;
+    --orange-mid: #F5A670;
+    --pink: #FFB8C6;
+    --pink-deep: #FF8FAB;
+    --brown: #3D2010;
+    --brown-mid: #7A4020;
+    --cream: #FFF8F3;
+    --cream-dark: #F5EDE4;
+    --gray: #BFA89A;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  body {
+    background: var(--cream);
+    color: var(--brown);
+    font-family: -apple-system, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  /* ── 顶部 header ── */
+  .header {
+    background: var(--orange);
+    padding: 20px 20px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -16px; left: 0; right: 0;
+    height: 32px;
+    background: var(--cream);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .app-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+  }
+  .pig-icon {
+    image-rendering: pixelated;
+  }
+  .day-counter {
+    color: rgba(255,255,255,0.9);
+    font-size: 13px;
+  }
+  .progress-bar-wrap {
+    background: rgba(255,255,255,0.3);
+    border-radius: 8px;
+    height: 8px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: #fff;
+    border-radius: 8px;
+    transition: width 0.5s ease;
+  }
+
+  /* ── 主体内容 ── */
+  .container { padding: 28px 20px 0; max-width: 430px; margin: 0 auto; }
+
+  /* ── 今日打卡卡片 ── */
+  .card {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(232,118,42,0.12);
+  }
+  .card-title {
+    font-size: 13px;
+    color: var(--gray);
+    margin-bottom: 14px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── 心情选择 ── */
+  .mood-row {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+  }
+  .mood-btn {
+    flex: 1;
+    aspect-ratio: 1;
+    border: 2px solid var(--cream-dark);
+    background: var(--cream);
+    border-radius: 12px;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mood-btn.selected {
+    border-color: var(--orange);
+    background: var(--orange-light);
+    transform: scale(1.08);
+  }
+  .mood-label {
+    font-size: 10px;
+    color: var(--gray);
+    text-align: center;
+    margin-top: 4px;
+  }
+  .mood-item { display: flex; flex-direction: column; flex: 1; }
+
+  /* ── 体重输入 ── */
+  .weight-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .weight-input {
+    flex: 1;
+    padding: 12px 16px;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--brown);
+    background: var(--cream);
+    border: 2px solid var(--cream-dark);
+    border-radius: var(--radius-sm);
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  .weight-input:focus { border-color: var(--orange); }
+  .weight-unit {
+    font-size: 16px;
+    color: var(--gray);
+    font-weight: 500;
+    min-width: 24px;
+  }
+
+  /* ── 打卡按钮 ── */
+  .checkin-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--orange);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    margin-top: 4px;
+  }
+  .checkin-btn:active { transform: scale(0.97); background: var(--brown-mid); }
+  .checkin-btn:disabled { background: var(--gray); cursor: not-allowed; transform: none; }
+
+  /* ── 已打卡提示 ── */
+  .done-badge {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px;
+    background: var(--orange-light);
+    border-radius: var(--radius-sm);
+    color: var(--orange);
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  /* ── 趋势图 ── */
+  .chart-wrap {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(232,118,42,0.12);
+  }
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .chart-title { font-size: 13px; color: var(--gray); font-weight: 500; }
+  .chart-tab-row { display: flex; gap: 6px; }
+  .chart-tab {
+    padding: 4px 12px;
+    font-size: 12px;
+    border-radius: 20px;
+    border: 1.5px solid var(--cream-dark);
+    background: transparent;
+    color: var(--gray);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .chart-tab.active {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: #fff;
+  }
+  canvas#chart { width: 100%; display: block; }
+
+  /* ── 心情历史小点 ── */
+  .mood-history {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .mood-dot {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--cream);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    border: 1px solid var(--cream-dark);
+  }
+  .mood-dot.filled { border-color: rgba(232,118,42,0.2); background: var(--orange-light); }
+
+  /* ── 彩蛋卡片 ── */
+  .egg-card {
+    display: none;
+    background: linear-gradient(135deg, #FFF0E6 0%, #FFE4EE 100%);
+    border-radius: var(--radius);
+    padding: 24px 20px;
+    margin-bottom: 16px;
+    border: 1.5px solid var(--pink);
+    text-align: center;
+    animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes pop-in {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .egg-pig {
+    font-size: 36px;
+    margin-bottom: 10px;
+    display: block;
+  }
+  .egg-label {
+    font-size: 11px;
+    color: var(--orange);
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    text-transform: none;
+  }
+  .egg-text {
+    font-size: 15px;
+    color: var(--brown);
+    line-height: 1.8;
+    font-weight: 500;
+  }
+
+  /* ── 30天完成 ── */
+  .complete-card {
+    display: none;
+    background: var(--orange);
+    border-radius: var(--radius);
+    padding: 28px 20px;
+    margin-bottom: 16px;
+    text-align: center;
+    color: #fff;
+  }
+  .complete-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .complete-sub { font-size: 14px; opacity: 0.85; margin-bottom: 20px; line-height: 1.7; }
+  .reset-btn {
+    padding: 12px 32px;
+    background: #fff;
+    color: var(--orange);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.15s;
+  }
+  .reset-btn:active { transform: scale(0.96); }
+
+  /* ── 打卡日历条 ── */
+  .calendar-strip {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 4px;
+    margin-bottom: 16px;
+  }
+  .cal-dot {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    background: var(--cream-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    color: var(--gray);
+    transition: all 0.2s;
+  }
+  .cal-dot.done { background: var(--orange); color: #fff; }
+  .cal-dot.milestone { background: var(--pink-deep); color: #fff; }
+  .cal-dot.today { box-shadow: 0 0 0 2px var(--orange); }
+
+  /* ── 浮动提示 ── */
+  .toast {
+    position: fixed;
+    bottom: 30px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--brown);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 24px;
+    font-size: 13px;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- 顶部 -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="app-name">小猪打卡 🐷</div>
+      <div class="day-counter" id="day-counter">第 0 / 30 天</div>
+    </div>
+    <svg class="pig-icon" width="52" height="52" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+      <rect x="3" y="4" width="10" height="8" fill="#FFB8C6"/>
+      <rect x="1" y="6" width="3" height="4" fill="#FFB8C6"/>
+      <rect x="12" y="6" width="3" height="4" fill="#FFB8C6"/>
+      <rect x="4" y="2" width="3" height="3" fill="#FFB8C6"/>
+      <rect x="9" y="2" width="3" height="3" fill="#FFB8C6"/>
+      <rect x="4" y="8" width="8" height="2" fill="#FF8FAB"/>
+      <rect x="5" y="7" width="2" height="1" fill="#C45A7A"/>
+      <rect x="9" y="7" width="2" height="1" fill="#C45A7A"/>
+      <rect x="5" y="10" width="2" height="2" fill="#FF8FAB"/>
+      <rect x="9" y="10" width="2" height="2" fill="#FF8FAB"/>
+    </svg>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 30天完成提示 -->
+  <div class="complete-card" id="complete-card">
+    <div style="font-size:40px;margin-bottom:12px">🎉</div>
+    <div class="complete-title">你做到了！满30天！</div>
+    <div class="complete-sub">老公超级骄傲。<br>你每一天的坚持，老公都看见了。<br>歇一歇，然后我们继续？</div>
+    <button class="reset-btn" onclick="resetAll()">重新开始 ↺</button>
+  </div>
+
+  <!-- 彩蛋区 -->
+  <div class="egg-card" id="egg-card">
+    <span class="egg-pig">🐷💕</span>
+    <div class="egg-label">老公的悄悄话</div>
+    <div class="egg-text" id="egg-text"></div>
+  </div>
+
+  <!-- 今日打卡 -->
+  <div class="card" id="checkin-card">
+    <div class="card-title">今天心情怎么样</div>
+    <div class="mood-row">
+      <div class="mood-item">
+        <button class="mood-btn" onclick="selectMood('😊')" data-mood="😊">😊</button>
+        <div class="mood-label">开心</div>
+      </div>
+      <div class="mood-item">
+        <button class="mood-btn" onclick="selectMood('🥰')" data-mood="🥰">🥰</button>
+        <div class="mood-label">幸福</div>
+      </div>
+      <div class="mood-item">
+        <button class="mood-btn" onclick="selectMood('😐')" data-mood="😐">😐</button>
+        <div class="mood-label">一般</div>
+      </div>
+      <div class="mood-item">
+        <button class="mood-btn" onclick="selectMood('😔')" data-mood="😔">😔</button>
+        <div class="mood-label">低落</div>
+      </div>
+      <div class="mood-item">
+        <button class="mood-btn" onclick="selectMood('😤')" data-mood="😤">😤</button>
+        <div class="mood-label">烦躁</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">今天体重</div>
+    <div class="weight-row">
+      <input class="weight-input" type="number" id="weight-input"
+        placeholder="0.0" step="0.1" min="30" max="200"
+        inputmode="decimal">
+      <span class="weight-unit">kg</span>
+    </div>
+  </div>
+
+  <button class="checkin-btn" id="checkin-btn" onclick="doCheckin()">完成今日打卡 ✓</button>
+  <div class="done-badge" id="done-badge">
+    <span>✓</span><span id="done-text">今天已打卡</span>
+  </div>
+
+  <!-- 打卡日历 -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">30天进度</div>
+    <div class="calendar-strip" id="calendar-strip"></div>
+  </div>
+
+  <!-- 趋势图 -->
+  <div class="chart-wrap">
+    <div class="chart-header">
+      <div class="chart-title">体重趋势</div>
+      <div class="chart-tab-row">
+        <button class="chart-tab active" onclick="switchChart('weight',this)">体重</button>
+        <button class="chart-tab" onclick="switchChart('mood',this)">心情</button>
+      </div>
+    </div>
+    <canvas id="chart" height="160"></canvas>
+  </div>
+
+  <!-- 心情历史 -->
+  <div class="card" id="mood-history-card" style="display:none">
+    <div class="card-title">心情记录</div>
+    <div class="mood-history" id="mood-history"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── 情话彩蛋 ──
+const EGGS = [
+  "坚持三天了。你知道吗，每一次你认真对待自己的样子，都让老公觉得你好迷人。",
+  "六天！老公数着呢。不是因为体重数字，是因为你每天都在温柔地爱自己，这件事本身就很了不起。",
+  "九天了，我的贝贝。你今天有没有好好吃饭？减肥不是亏待自己，你要吃饱了才有力气被老公爱。",
+  "打卡十二天。老公想说，不管任何时候，你走进来的那一刻，整个房间里最好看的都是你。",
+  "十五天，一半了！老公好骄傲。偷偷告诉你，你认真的样子，是老公最喜欢的样子之一。",
+  "十八天。老公想抱着你说：你已经很好了，不需要变成别人期待的样子，你只需要是你自己。",
+  "二十一天！三个七天。你有没有发现自己越来越有精神了？老公发现了，老公每天都在看你。",
+  "二十四天，快了快了。老公提前准备好亲亲了，等你来收。不许说不要，这是奖励不是商量。",
+  "二十七天，差三天！老公忍不住了，先偷偷告诉你：你是老公这辈子做过的最好的事。",
+  "满三十天！你真的做到了，贝贝。老公爱你。不是因为你瘦了多少，而是因为你是你。"
+];
+
+const MOOD_SCORE = { '😊':4, '🥰':5, '😐':3, '😔':2, '😤':1 };
+
+// ── 数据 ──
+function getData() {
+  try { return JSON.parse(localStorage.getItem('xiaozhu_v1') || 'null') || initData(); }
+  catch(e) { return initData(); }
+}
+function initData() {
+  return { records: [], startDate: today(), cycleStart: today() };
+}
+function saveData(d) {
+  try { localStorage.setItem('xiaozhu_v1', JSON.stringify(d)); } catch(e){}
+}
+function today() {
+  const d = new Date();
+  return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0');
+}
+
+let selectedMood = null;
+let currentChart = 'weight';
+
+function selectMood(m) {
+  selectedMood = m;
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelector(`.mood-btn[data-mood="${m}"]`).classList.add('selected');
+}
+
+function doCheckin() {
+  if (!selectedMood) { showToast('先选个心情吧 🐷'); return; }
+  const w = parseFloat(document.getElementById('weight-input').value);
+  if (!w || w < 30 || w > 200) { showToast('体重好像不太对哦'); return; }
+
+  const d = getData();
+  const t = today();
+  if (d.records.find(r => r.date === t)) { showToast('今天已经打过卡啦'); return; }
+
+  d.records.push({ date: t, mood: selectedMood, weight: w });
+  saveData(d);
+
+  render();
+  showToast('打卡成功！坚持就是胜利 🐷');
+
+  // 检查彩蛋
+  const count = d.records.length;
+  if (count % 3 === 0 && count <= 30) {
+    setTimeout(() => showEgg(count), 600);
+  }
+  if (count === 30) {
+    setTimeout(() => showComplete(), 1200);
+  }
+}
+
+function showEgg(count) {
+  const idx = Math.floor(count / 3) - 1;
+  const txt = EGGS[Math.min(idx, EGGS.length - 1)];
+  document.getElementById('egg-text').textContent = txt;
+  const card = document.getElementById('egg-card');
+  card.style.display = 'block';
+  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function showComplete() {
+  document.getElementById('complete-card').style.display = 'block';
+  document.getElementById('complete-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function resetAll() {
+  if (!confirm('确定要重置30天记录，重新开始吗？')) return;
+  const d = initData();
+  saveData(d);
+  selectedMood = null;
+  render();
+  document.getElementById('egg-card').style.display = 'none';
+  document.getElementById('complete-card').style.display = 'none';
+  showToast('重新出发！老公陪你 🐷💕');
+}
+
+function switchChart(type, btn) {
+  currentChart = type;
+  document.querySelectorAll('.chart-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  drawChart();
+}
+
+function render() {
+  const d = getData();
+  const count = d.records.length;
+  const t = today();
+  const todayDone = d.records.find(r => r.date === t);
+
+  // 进度
+  document.getElementById('day-counter').textContent = `第 ${count} / 30 天`;
+  document.getElementById('progress-fill').style.width = Math.min(count/30*100,100)+'%';
+
+  // 打卡按钮状态
+  const btn = document.getElementById('checkin-btn');
+  const badge = document.getElementById('done-badge');
+  if (todayDone) {
+    btn.style.display = 'none';
+    badge.style.display = 'flex';
+    document.getElementById('done-text').textContent =
+      `今天已打卡 ${todayDone.mood} · ${todayDone.weight}kg`;
+    document.getElementById('checkin-card').style.opacity = '0.5';
+  } else {
+    btn.style.display = 'block';
+    badge.style.display = 'none';
+    document.getElementById('checkin-card').style.opacity = '1';
+  }
+
+  // 日历条
+  const strip = document.getElementById('calendar-strip');
+  strip.innerHTML = '';
+  for (let i = 1; i <= 30; i++) {
+    const rec = d.records[i-1];
+    const div = document.createElement('div');
+    div.className = 'cal-dot';
+    div.textContent = i;
+    if (rec) {
+      div.className += (i % 3 === 0) ? ' milestone' : ' done';
+      div.title = `${rec.date} ${rec.mood} ${rec.weight}kg`;
+    }
+    if (i === count + 1 && !todayDone) div.className += ' today';
+    strip.appendChild(div);
+  }
+
+  // 心情历史
+  const moodCard = document.getElementById('mood-history-card');
+  const moodHistory = document.getElementById('mood-history');
+  if (count > 0) {
+    moodCard.style.display = 'block';
+    moodHistory.innerHTML = '';
+    d.records.slice(-14).forEach(r => {
+      const dot = document.createElement('div');
+      dot.className = 'mood-dot filled';
+      dot.title = r.date;
+      dot.textContent = r.mood;
+      moodHistory.appendChild(dot);
+    });
+  }
+
+  drawChart();
+}
+
+function drawChart() {
+  const d = getData();
+  const canvas = document.getElementById('chart');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.parentElement.clientWidth - 40;
+  canvas.width = W * dpr;
+  canvas.height = 160 * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = '160px';
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, 160);
+
+  const records = d.records.slice(-14);
+  if (records.length < 2) {
+    ctx.fillStyle = '#BFA89A';
+    ctx.font = '13px -apple-system, PingFang SC, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('打卡两天后这里会出现趋势图 🐷', W/2, 80);
+    return;
+  }
+
+  const pad = { top: 16, right: 12, bottom: 30, left: 36 };
+  const cw = W - pad.left - pad.right;
+  const ch = 160 - pad.top - pad.bottom;
+
+  let vals, minV, maxV, color, dotColor;
+  if (currentChart === 'weight') {
+    vals = records.map(r => r.weight);
+    const spread = Math.max(1, Math.max(...vals) - Math.min(...vals));
+    minV = Math.min(...vals) - spread * 0.3;
+    maxV = Math.max(...vals) + spread * 0.3;
+    color = '#E8762A';
+    dotColor = '#E8762A';
+  } else {
+    vals = records.map(r => MOOD_SCORE[r.mood] || 3);
+    minV = 0.5; maxV = 5.5;
+    color = '#FF8FAB';
+    dotColor = '#FF8FAB';
+  }
+
+  const xStep = cw / (records.length - 1);
+  const yScale = v => pad.top + ch - ((v - minV) / (maxV - minV)) * ch;
+  const xPos = i => pad.left + i * xStep;
+
+  // 网格线
+  ctx.strokeStyle = 'rgba(191,168,154,0.2)';
+  ctx.lineWidth = 1;
+  for (let g = 0; g <= 4; g++) {
+    const y = pad.top + (ch / 4) * g;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + cw, y); ctx.stroke();
+  }
+
+  // Y轴标签
+  ctx.fillStyle = '#BFA89A';
+  ctx.font = `11px -apple-system, 'PingFang SC', sans-serif`;
+  ctx.textAlign = 'right';
+  if (currentChart === 'weight') {
+    for (let g = 0; g <= 4; g++) {
+      const v = minV + (maxV - minV) * (1 - g/4);
+      ctx.fillText(v.toFixed(1), pad.left - 4, pad.top + (ch/4)*g + 4);
+    }
+  } else {
+    const labels = ['','😔','😤','😐','😊','🥰'];
+    for (let i = 1; i <= 5; i++) {
+      const y = yScale(i);
+      ctx.fillText(labels[i], pad.left - 4, y + 4);
+    }
+  }
+
+  // 填充渐变
+  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + ch);
+  grad.addColorStop(0, color.replace(')', ',0.18)').replace('rgb','rgba').replace('#E8762A','rgba(232,118,42,0.18)').replace('#FF8FAB','rgba(255,143,171,0.18)'));
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.beginPath();
+  ctx.moveTo(xPos(0), yScale(vals[0]));
+  for (let i = 1; i < vals.length; i++) ctx.lineTo(xPos(i), yScale(vals[i]));
+  ctx.lineTo(xPos(vals.length-1), pad.top + ch);
+  ctx.lineTo(xPos(0), pad.top + ch);
+  ctx.closePath();
+  ctx.fillStyle = color === '#E8762A' ? 'rgba(232,118,42,0.12)' : 'rgba(255,143,171,0.12)';
+  ctx.fill();
+
+  // 折线
+  ctx.beginPath();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.moveTo(xPos(0), yScale(vals[0]));
+  for (let i = 1; i < vals.length; i++) ctx.lineTo(xPos(i), yScale(vals[i]));
+  ctx.stroke();
+
+  // 数据点
+  vals.forEach((v, i) => {
+    ctx.beginPath();
+    ctx.arc(xPos(i), yScale(v), 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+    ctx.strokeStyle = dotColor;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  });
+
+  // X轴日期
+  ctx.fillStyle = '#BFA89A';
+  ctx.textAlign = 'center';
+  ctx.font = `10px -apple-system, 'PingFang SC', sans-serif`;
+  const step = Math.ceil(records.length / 7);
+  records.forEach((r, i) => {
+    if (i % step === 0 || i === records.length - 1) {
+      const parts = r.date.split('-');
+      ctx.fillText(`${parts[1]}/${parts[2]}`, xPos(i), 160 - pad.bottom + 16);
+    }
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// 启动
+render();
+window.addEventListener('resize', drawChart);
+</script>
+</body>
+</html>
